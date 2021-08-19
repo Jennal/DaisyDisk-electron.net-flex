@@ -19,6 +19,7 @@ const {
 const {
     resolve
 } = require('path');
+const { exception } = require('console');
 
 let nextPackId = 1;
 let cbMap = {};
@@ -44,7 +45,7 @@ app.on('ready', async () => {
     win.loadURL('http://localhost:' + webPort + '/wwwroot/index.html');
 
     win.webContents.on('did-finish-load', function () {
-        win.webContents.executeJavaScript("client.connect('localhost', " + wsPort + ");");
+        invokeBrowserJs("client.connect('localhost', " + wsPort + ");");
     });
 
     win.once('ready-to-show', () => {
@@ -91,28 +92,17 @@ async function startServer() {
                 case NodePackType.InvokeCode:
                     console.log("CS Invoke: " + pack.Content);
                     var result = eval(pack.Content);
-                    if (isPromise(result)) {
-                        var packId = pack.Id;
-                        result.then(val => {
-                            var json = JSON.stringify(val);
-                            json = json === undefined ? 'null' : json;
-                            console.log("Invoke Result: " + json);
-                            var retPack = new NodePack(packId, NodePackType.InvokeResult, json);
-
-                            child.stdin.cork();
-                            child.stdin.write(retPack.Encode());
-                            child.stdin.uncork();
-                        });
-                    } else {
-                        var json = JSON.stringify(result);
+                    var packId = pack.Id;
+                    unpackResult(result, val => {
+                        var json = JSON.stringify(val);
                         json = json === undefined ? 'null' : json;
                         console.log("Invoke Result: " + json);
-                        var retPack = new NodePack(pack.Id, NodePackType.InvokeResult, json);
+                        var retPack = new NodePack(packId, NodePackType.InvokeResult, json);
 
                         child.stdin.cork();
                         child.stdin.write(retPack.Encode());
                         child.stdin.uncork();
-                    }
+                    });
                     break;
                 case NodePackType.InvokeResult:
                     console.log("CS Result: " + pack.Content);
@@ -137,6 +127,16 @@ async function startServer() {
         "webPort": webPort,
         "wsPort": wsPort
     };
+}
+
+function unpackResult(result, cb) {
+    if (isPromise(result)) {
+        result.then(val => {
+            unpackResult(val, cb);
+        });
+    } else {
+        cb(result);
+    }
 }
 
 function invokeCsharp(cls, method) {
@@ -164,6 +164,12 @@ function invokeCsharp(cls, method) {
         csProcess.stdin.write(pack.Encode());
         csProcess.stdin.uncork();
     });
+}
+
+function invokeBrowserJs(code) {
+    if (!mainWin) throw new exception('Main Window not inited yet!');
+
+    mainWin.webContents.executeJavaScript(code);
 }
 
 function isPromise(v) {

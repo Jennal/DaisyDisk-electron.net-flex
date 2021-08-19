@@ -404,11 +404,14 @@
         if (!pack) return;
 
         var data = new ByteArray(10+pack.Content.length);
-        data.writeUint32(data.length - 4);
-        data.writeUint8(pack.Id);
-        data.writeUint8(pack.Type);
-        data.writeUint32(pack.Content.length);
-        data.writeString(pack.Content);
+        data = data.writeUint32(data.length - 4);
+        data = data.writeUint8(pack.Id);
+        data = data.writeUint8(pack.Type);
+
+        var contentBytes = strencode(pack.Content);
+        data = data.writeUint32(contentBytes.length);
+        // console.log("contentBytes:", contentBytes.length, contentBytes);
+        data = data.writeBytes(contentBytes);
 
         // console.log("send:", data);
         ws.send(data);
@@ -546,6 +549,9 @@
 
     exports.Emitter = Emitter;
     exports.client = client;
+
+    exports.strencode = strencode;
+    exports.strdecode = strdecode;
 })(
     typeof (window) == "undefined" ? module.exports : window,
     typeof (window) == "undefined" ? Buffer : Uint8Array

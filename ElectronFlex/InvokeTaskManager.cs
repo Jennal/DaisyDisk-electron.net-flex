@@ -80,7 +80,8 @@ namespace ElectronFlex
             var propertyInfo = type.GetProperty("Result");
             if (propertyInfo == null) return null;
 
-            return propertyInfo.GetValue(result);
+            result = propertyInfo.GetValue(result);
+            return UnPackResult(result);
         }
 
         private static Tuple<string, string> SplitNsClass(string invokeClass)

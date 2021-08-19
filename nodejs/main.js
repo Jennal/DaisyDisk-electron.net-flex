@@ -86,7 +86,7 @@ async function startServer() {
                         break;
                     case NodePackType.InvokeResult:
                         console.log("CS Result: " + pack.Content);
-                        var result = Function('"use strict";return (' + obj + ')')();
+                        var result = Function('"use strict";return (' + pack.Content + ')')();
                         if (cbMap[pack.Id]) {
                             let {resolve, reject} = cbMap[pack.Id];
                             resolve(result);

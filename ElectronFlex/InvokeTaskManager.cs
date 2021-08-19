@@ -13,7 +13,7 @@ namespace ElectronFlex
         public string Method;
         public object[] Arguments;
     }
-    
+
     public class InvokeTaskManager
     {
         public ConcurrentDictionary<byte, object> _dict = new ConcurrentDictionary<byte, object>();
@@ -35,19 +35,20 @@ namespace ElectronFlex
             var setResultMethod = typeof(TaskCompletionSource<>).MakeGenericType(resultType)
                 .GetMethod(nameof(TaskCompletionSource.SetResult));
 
-            var jsonConvertMethod = typeof(JsonConvert).GetGenericMethod(nameof(JsonConvert.DeserializeObject), new[] {resultType}, typeof(string));
+            var jsonConvertMethod = typeof(JsonConvert).GetGenericMethod(nameof(JsonConvert.DeserializeObject),
+                new[] {resultType}, typeof(string));
             var result = jsonConvertMethod.Invoke(null, new object?[] {pack.Content});
             setResultMethod!.Invoke(obj, new[] {result});
         }
-        
+
         public object DoInvoke(Pack pack)
         {
             var invoke = JsonConvert.DeserializeObject<InvokeData>(pack.Content);
             if (invoke == null)
             {
-                return new InvokeError(null, "wrong invoke structure");    
+                return new InvokeError(null, "wrong invoke structure");
             }
-            
+
             var (ns, _) = SplitNsClass(invoke?.Class);
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             if (!string.IsNullOrEmpty(ns))
@@ -67,14 +68,14 @@ namespace ElectronFlex
 
             return new InvokeError(invoke, "can't find method");
         }
-        
+
         public static object? UnPackResult(object? result)
         {
             if (result == null) return result;
             var type = result.GetType();
             if (type.Name != "Task" && !type.Name.StartsWith("Task`")) return result;
 
-            var method = type.GetMethod("Wait", BindingFlags.Instance| BindingFlags.Public, new object[0]);
+            var method = type.GetMethod("Wait", BindingFlags.Instance | BindingFlags.Public, new object[0]);
             method.Invoke(result, null);
 
             var propertyInfo = type.GetProperty("Result");
@@ -87,10 +88,10 @@ namespace ElectronFlex
         private static Tuple<string, string> SplitNsClass(string invokeClass)
         {
             if (string.IsNullOrEmpty(invokeClass)) return null;
-            
+
             var idx = invokeClass.LastIndexOf(".");
             return new Tuple<string, string>(
-                invokeClass.Substring(0, idx), 
+                invokeClass.Substring(0, idx),
                 invokeClass.Substring(idx + 1, invokeClass.Length - idx - 1)
             );
         }

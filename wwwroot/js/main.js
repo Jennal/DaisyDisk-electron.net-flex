@@ -8,8 +8,9 @@
             pie: null
         },
         methods: {
-            selectDir: function() {
-                alert("select dir");
+            selectDir: async function() {
+                var path = await client.invokeNode("openFolder()");
+                console.log(path);
             }
         }
     });

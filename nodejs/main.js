@@ -1,7 +1,8 @@
 const {
     app,
     BrowserWindow,
-    protocol
+    protocol,
+    dialog
 } = require('electron');
 const {
     spawn
@@ -174,4 +175,8 @@ function invokeBrowserJs(code) {
 
 function isPromise(v) {
     return typeof v === 'object' && typeof v.then === 'function';
+}
+
+function openFolder() {
+    return dialog.showOpenDialogSync(mainWin, {'title': 'Choose', 'properties': ['openDirectory'] });
 }

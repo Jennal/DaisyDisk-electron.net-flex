@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+    <script src="/wwwroot/js/client.js"></script>
+    <script src="/wwwroot/js/jquery.3.6.0.js"></script>
+    <script src="/wwwroot/js/vue.2.6.14.js"></script>
+    <script src="/wwwroot/js/main.js"></script>
+</head>
+<body>
+
+<div id="app">
+    <div>
+        <input type="text" :value="path" readonly="readonly" style="width: 80%" @click="selectDir" />
+        <button type="button" @click="selectDir">选择...</button>
+    </div>
+    <div id="progress"></div>
+    <div id="pie" class="pie-container"></div>
+</div>
+
+</body>
+</html>

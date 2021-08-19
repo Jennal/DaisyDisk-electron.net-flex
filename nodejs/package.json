@@ -1,0 +1,40 @@
+{
+  "devDependencies": {
+    "electron": "^13.1.6",
+    "electron-builder": "^22.11.7"
+  },
+  "name": "electron.net-flex-demo",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "jest",
+    "build": "electron-builder"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "build": {
+    "appId": "com.jennal.electron.watson",
+    "mac": {
+      "category": "public.app-category.utilities"
+    },
+    "extraFiles": [
+      {
+        "from": "../ElectronFlex/bin/Release/net5.0/publish",
+        "to": "bin",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "electronDownload": {
+      "mirror": "https://npm.taobao.org/mirrors/electron/"
+    }
+  },
+  "dependencies": {
+    "jest": "^27.0.6",
+    "portscanner": "^2.2.0",
+    "yauzl": "^2.10.0"
+  }
+}

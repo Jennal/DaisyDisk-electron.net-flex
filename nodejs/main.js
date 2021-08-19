@@ -178,5 +178,5 @@ function isPromise(v) {
 }
 
 function openFolder() {
-    return dialog.showOpenDialogSync(mainWin, {'title': 'Choose', 'properties': ['openDirectory'] });
+    return dialog.showOpenDialogSync(mainWin, {'title': '选择文件夹', 'properties': ['openDirectory'] });
 }

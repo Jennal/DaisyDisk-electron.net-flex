@@ -54,14 +54,21 @@ namespace ElectronFlex
                 var pack = Pack.Decode(packBuff);
                 Console.WriteLine($">>>>>>> WebSocket.Recv: {pack}");
 
-                switch (pack.Type)
+                try
                 {
-                    case PackType.InvokeCode:
-                        InvokeFromBrowser(pack);
-                        break;
-                    case PackType.InvokeResult:
-                        s_taskManager.Result(pack);
-                        break;
+                    switch (pack.Type)
+                    {
+                        case PackType.InvokeCode:
+                            InvokeFromBrowser(pack);
+                            break;
+                        case PackType.InvokeResult:
+                            s_taskManager.Result(pack);
+                            break;
+                    }
+                }
+                catch (Exception err)
+                {
+                    Console.WriteLine($"BrowserJs.Loop Error: {err}");
                 }
             }
         }

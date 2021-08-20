@@ -100,6 +100,7 @@ namespace DaisyDisk
                     baseId = data.Id,
                     id = child.Id,
                     name = $"{name} ({child.Size.ToHumanReadable()})",
+                    size = child.Size,
                     y = (int) Math.Round((double) child.Size / data.Size * 10000, 0)
                 };
 
@@ -142,6 +143,7 @@ namespace DaisyDisk
                             baseId = child.Id,
                             id = subChild.Id,
                             name = $"{subName} ({subChild.Size.ToHumanReadable()})",
+                            size = subChild.Size,
                             y = (int) Math.Round((double) subChild.Size / data.Size * 10000, 0)
                         };
 

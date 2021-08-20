@@ -50,19 +50,26 @@ namespace ElectronFlex
                 var length = br.ReadInt32();
                 var data = br.ReadBytes(length);
                 var pack = Pack.Decode(data);
-                switch (pack.Type)
+                try
                 {
-                    case PackType.ConsoleOutput:
-                        /* DO NOTHING */
-                        break;
-                    case PackType.InvokeCode:
-                        InvokeCode(pack);
-                        break;
-                    case PackType.InvokeResult:
-                        s_taskManager.Result(pack);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    switch (pack.Type)
+                    {
+                        case PackType.ConsoleOutput:
+                            /* DO NOTHING */
+                            break;
+                        case PackType.InvokeCode:
+                            InvokeCode(pack);
+                            break;
+                        case PackType.InvokeResult:
+                            s_taskManager.Result(pack);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+                catch (Exception err)
+                {
+                    Console.WriteLine($"NodeJs.Loop Error: {err}");
                 }
             }
         }

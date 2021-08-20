@@ -9,6 +9,7 @@ namespace ElectronFlex
     {
         public static void ClientConnected(object? sender, ClientConnectedEventArgs e)
         {
+            Console.WriteLine($"WebSocket Client Connected: {e.IpPort}");
             // Task.Run(() =>
             // {
             //     var task = BrowserJs.Invoke<int>("Math.abs(-1)");
@@ -19,6 +20,7 @@ namespace ElectronFlex
 
         public static void ClientDisconnected(object? sender, ClientDisconnectedEventArgs e)
         {
+            Console.WriteLine($"WebSocket Client Disconnected: {e.IpPort}");
         }
 
         public static void MessageReceived(object? sender, MessageReceivedEventArgs e)

@@ -5,12 +5,20 @@
         data: {
             path: "",
             progress: 0,
-            pie: null
+            pie: {}
+        },
+        watch: {
+            pie: function(newVal, oldVal) {
+                console.log("pie updated", newVal);
+            }
         },
         methods: {
             selectDir: async function() {
                 var path = await client.invokeNode("openFolder()");
                 console.log(path);
+                if (!path || !path.length) return;
+                
+                client.invoke("ElectronFlex.Handler", "Create", path[0]);
             }
         }
     });

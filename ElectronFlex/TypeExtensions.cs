@@ -17,14 +17,132 @@ namespace ElectronFlex
             {"bool", "Boolean"},
             {"string", "String"},
         };
-        
+
         private class SimpleTypeComparer : IEqualityComparer<Type>
         {
             public bool Equals(Type x, Type y)
             {
-                return x.Assembly == y.Assembly &&
-                       x.Namespace == y.Namespace &&
-                       x.Name == y.Name;
+                return (HasImplicitConversion(x, y)) ||
+                        (x.Assembly == y.Assembly &&
+                        x.Namespace == y.Namespace &&
+                        x.Name == y.Name);
+            }
+
+            public static bool HasImplicitConversion(Type destination, Type source)
+            {
+                var sourceCode = Type.GetTypeCode(source);
+                var destinationCode = Type.GetTypeCode(destination);
+                switch (sourceCode)
+                {
+                    case TypeCode.SByte:
+                        switch (destinationCode)
+                        {
+                            case TypeCode.Int16:
+                            case TypeCode.Int32:
+                            case TypeCode.Int64:
+                            case TypeCode.Single:
+                            case TypeCode.Double:
+                            case TypeCode.Decimal:
+                                return true;
+                        }
+
+                        return false;
+                    case TypeCode.Byte:
+                        switch (destinationCode)
+                        {
+                            case TypeCode.Int16:
+                            case TypeCode.UInt16:
+                            case TypeCode.Int32:
+                            case TypeCode.UInt32:
+                            case TypeCode.Int64:
+                            case TypeCode.UInt64:
+                            case TypeCode.Single:
+                            case TypeCode.Double:
+                            case TypeCode.Decimal:
+                                return true;
+                        }
+
+                        return false;
+                    case TypeCode.Int16:
+                        switch (destinationCode)
+                        {
+                            case TypeCode.Int32:
+                            case TypeCode.Int64:
+                            case TypeCode.Single:
+                            case TypeCode.Double:
+                            case TypeCode.Decimal:
+                                return true;
+                        }
+
+                        return false;
+                    case TypeCode.UInt16:
+                        switch (destinationCode)
+                        {
+                            case TypeCode.Int32:
+                            case TypeCode.UInt32:
+                            case TypeCode.Int64:
+                            case TypeCode.UInt64:
+                            case TypeCode.Single:
+                            case TypeCode.Double:
+                            case TypeCode.Decimal:
+                                return true;
+                        }
+
+                        return false;
+                    case TypeCode.Int32:
+                        switch (destinationCode)
+                        {
+                            case TypeCode.Int64:
+                            case TypeCode.Single:
+                            case TypeCode.Double:
+                            case TypeCode.Decimal:
+                                return true;
+                        }
+
+                        return false;
+                    case TypeCode.UInt32:
+                        switch (destinationCode)
+                        {
+                            case TypeCode.UInt32:
+                            case TypeCode.UInt64:
+                            case TypeCode.Single:
+                            case TypeCode.Double:
+                            case TypeCode.Decimal:
+                                return true;
+                        }
+
+                        return false;
+                    case TypeCode.Int64:
+                    case TypeCode.UInt64:
+                        switch (destinationCode)
+                        {
+                            case TypeCode.Single:
+                            case TypeCode.Double:
+                            case TypeCode.Decimal:
+                                return true;
+                        }
+
+                        return false;
+                    case TypeCode.Char:
+                        switch (destinationCode)
+                        {
+                            case TypeCode.UInt16:
+                            case TypeCode.Int32:
+                            case TypeCode.UInt32:
+                            case TypeCode.Int64:
+                            case TypeCode.UInt64:
+                            case TypeCode.Single:
+                            case TypeCode.Double:
+                            case TypeCode.Decimal:
+                                return true;
+                        }
+
+                        return false;
+                    case TypeCode.Single:
+                        return (destinationCode == TypeCode.Double);
+                }
+
+                return false;
             }
 
             public int GetHashCode(Type obj)
@@ -41,7 +159,7 @@ namespace ElectronFlex
             {
                 if (!method.IsGenericMethod) continue;
                 if (method.GetGenericArguments().Length != genericTypes.Length) continue;
-                
+
                 var methodParameterTypes = method.GetParameters().Select(p => p.ParameterType).ToArray();
                 if (methodParameterTypes.SequenceEqual(parameterTypes, new SimpleTypeComparer()))
                 {
@@ -99,7 +217,7 @@ namespace ElectronFlex
                     if (!method.IsGenericMethod) continue;
                     if (method.GetGenericArguments().Length != genericTypes.Length) continue;
                 }
-                
+
                 var methodParameterTypes = method.GetParameters().Select(p => p.ParameterType).ToArray();
                 if (methodParameterTypes.SequenceEqual(args.Select(o => o.GetType()), new SimpleTypeComparer()))
                 {
@@ -108,7 +226,7 @@ namespace ElectronFlex
                         var types = ToTypeArray(genericTypes);
                         return method.MakeGenericMethod(types);
                     }
-                    
+
                     return method;
                 }
             }
@@ -120,7 +238,7 @@ namespace ElectronFlex
         {
             var (name, genericTypes) = SplitName(typeName);
             if (s_builtinTypeMap.ContainsKey(name)) name = s_builtinTypeMap[name];
-            
+
             if (genericTypes == null || genericTypes.Length <= 0)
             {
                 return GetTypeFromAllAssemblies(name);
@@ -132,7 +250,7 @@ namespace ElectronFlex
                 return type.MakeGenericType(typeGenericArgs);
             }
         }
-        
+
         private static (string, string[]) SplitName(string name)
         {
             string[] genericTypes = null;
@@ -147,7 +265,7 @@ namespace ElectronFlex
 
             return (name, genericTypes);
         }
-        
+
         private static Type[] ToTypeArray(string[] typeNames)
         {
             var result = new List<Type>();
@@ -155,11 +273,11 @@ namespace ElectronFlex
             {
                 result.Add(ToType(typeName));
             }
-            
+
             return result.ToArray();
         }
 
-        private static Type GetTypeFromAllAssemblies(string name, Predicate<Type> predicate=null)
+        private static Type GetTypeFromAllAssemblies(string name, Predicate<Type> predicate = null)
         {
             var (ns, typeName) = SplitNs(name);
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -167,7 +285,7 @@ namespace ElectronFlex
             {
                 assemblies = assemblies.Where(o => o.GetName().Name.StartsWith(ns)).ToArray();
             }
-            
+
             foreach (var assembly in assemblies)
             {
                 var type = assembly.GetTypes()
@@ -205,16 +323,16 @@ namespace ElectronFlex
             result.Add(typeArgs.Substring(start, typeArgs.Length - start).Trim());
             return result.ToArray();
         }
-        
+
         private static Tuple<string, string> SplitNs(string name)
         {
             if (string.IsNullOrEmpty(name)) return null;
-            
+
             var idx = name.LastIndexOf(".");
             if (idx < 0) return new Tuple<string, string>(null, name);
-            
+
             return new Tuple<string, string>(
-                name.Substring(0, idx), 
+                name.Substring(0, idx),
                 name.Substring(idx + 1, name.Length - idx - 1)
             );
         }

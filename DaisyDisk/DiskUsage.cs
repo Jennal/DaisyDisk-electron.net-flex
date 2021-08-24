@@ -164,5 +164,33 @@ namespace DaisyDisk
                 GetAllFiles(child, list);
             }
         }
+
+        public DiskItem Find(DiskItem node, int id)
+        {
+            if (node.Id == id) return node;
+            if (node.Children == null) return null;
+
+            foreach (var child in node.Children)
+            {
+                var result = Find(child, id);
+                if (result != null) return result;
+            }
+
+            return null;
+        }
+
+        public DiskItem Parent(DiskItem root, DiskItem item)
+        {
+            if (root?.Children == null) return null;
+            if (root.Children.Contains(item)) return root;
+
+            foreach (var child in root.Children)
+            {
+                var parent = Parent(child, item);
+                if (parent != null) return parent;
+            }
+
+            return null;
+        }
     }
 }

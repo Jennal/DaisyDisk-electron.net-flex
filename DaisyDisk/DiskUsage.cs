@@ -37,6 +37,7 @@ namespace DaisyDisk
         public DiskItem Create(string path)
         {
             var attr = File.GetAttributes(path);
+            if (attr.HasFlag(FileAttributes.NotContentIndexed)) return null;
 
             var data = new DiskItem
             {
@@ -54,12 +55,16 @@ namespace DaisyDisk
                 foreach (var file in files)
                 {
                     var item = Create(file);
+                    if (item == null) continue;
+                    
                     data.Children.Add(item);
                 }
                 
                 foreach (var dir in dirs)
                 {
                     var item = Create(dir);
+                    if (item == null) continue;
+
                     data.Children.Add(item);
                 }
             }
